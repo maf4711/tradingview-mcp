@@ -70,6 +70,35 @@ Gives your AI assistant eyes and hands on your own chart:
 - **CLI access** — every MCP tool is also a `tv` CLI command, pipe-friendly with JSON output
 - **Launch TradingView** — auto-detect and launch with debug mode from any platform
 
+## Trading Tool (`tt`) — higher-level workflows
+
+This checkout includes a local **Trading Tool** layer on top of the MCP bridge:
+
+```bash
+npm link          # installs `tv` + `tt`
+tt launch         # TradingView with CDP
+tt status
+tt brief --save   # morning brief + watchlist scan
+tt analyze BTCUSDT --tf 15
+tt scan --tf 60
+tt setup … --layout 2x2
+tt snapshot --save
+```
+
+See **[trading-tool/README.md](trading-tool/README.md)** for full commands, config (`~/.trading-tool/config.json`), and architecture.
+
+## macOS App — TV Trading Desk
+
+Full desktop UI (Electron) for the same workflows:
+
+```bash
+cd desktop && npm install && npm start
+# build .app:
+npm run dist
+```
+
+See **[desktop/README.md](desktop/README.md)**.
+
 ## Install with Claude Code
 
 Paste this into Claude Code and it will handle the rest:

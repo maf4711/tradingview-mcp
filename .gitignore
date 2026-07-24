@@ -5,3 +5,12 @@ temp_*
 *.log
 discovery-log.json
 rules.json
+
+# trading-tool
+reports/
+trading-tool.config.json
+
+# desktop (Electron)
+desktop/node_modules/
+desktop/dist/
+desktop/out/
