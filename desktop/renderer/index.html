@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'; img-src 'self' data: file:;" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TV Trading Desk</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Titlebar drag region (macOS hiddenInset) -->
+    <header class="titlebar">
+      <div class="titlebar-drag">
+        <div class="brand">
+          <span class="brand-mark">◈</span>
+          <span class="brand-name">TV Trading Desk</span>
+        </div>
+      </div>
+      <div class="titlebar-status" id="conn-pill" data-ok="false">
+        <span class="dot"></span>
+        <span id="conn-text">Disconnected</span>
+      </div>
+      <div class="titlebar-actions">
+        <button class="btn btn-ghost" id="btn-refresh" title="Status aktualisieren">↻</button>
+        <button class="btn btn-primary" id="btn-launch">Launch TV</button>
+      </div>
+    </header>
+
+    <div class="shell">
+      <nav class="sidebar">
+        <button class="nav-item active" data-view="dashboard">Dashboard</button>
+        <button class="nav-item" data-view="analyze">Analyze</button>
+        <button class="nav-item" data-view="scan">Scan</button>
+        <button class="nav-item" data-view="brief">Brief</button>
+        <button class="nav-item" data-view="levels">Levels</button>
+        <button class="nav-item" data-view="setup">Setup</button>
+        <button class="nav-item" data-view="snapshot">Snapshot</button>
+        <div class="nav-spacer"></div>
+        <button class="nav-item" data-view="settings">Settings</button>
+        <button class="nav-item" data-view="logs">Logs</button>
+      </nav>
+
+      <main class="content">
+        <!-- DASHBOARD -->
+        <section class="view active" id="view-dashboard">
+          <div class="view-head">
+            <h1>Dashboard</h1>
+            <p class="muted">Lokale Steuerung deiner TradingView Desktop App via CDP</p>
+          </div>
+          <div class="grid cards-3">
+            <article class="card">
+              <h3>Verbindung</h3>
+              <div class="metric" id="dash-conn">—</div>
+              <p class="muted small" id="dash-window">—</p>
+            </article>
+            <article class="card">
+              <h3>Aktiver Chart</h3>
+              <div class="metric" id="dash-symbol">—</div>
+              <p class="muted small" id="dash-tf">—</p>
+            </article>
+            <article class="card">
+              <h3>Schnellaktionen</h3>
+              <div class="btn-row wrap">
+                <button class="btn btn-secondary" data-go="analyze">Analyze</button>
+                <button class="btn btn-secondary" data-go="scan">Scan</button>
+                <button class="btn btn-secondary" data-go="brief">Brief</button>
+                <button class="btn btn-secondary" data-go="snapshot">Snapshot</button>
+              </div>
+            </article>
+          </div>
+          <div class="card mt">
+            <h3>Workflow</h3>
+            <ol class="steps">
+              <li><strong>Launch TV</strong> — TradingView mit Debug-Port 9222 starten</li>
+              <li><strong>Analyze</strong> — Quote, Range, Bias, Indikatoren, Pine-Levels</li>
+              <li><strong>Scan / Brief</strong> — Watchlist multi-symbol Überblick</li>
+              <li><strong>Levels / Setup</strong> — S/R zeichnen, Multi-Pane Workspace</li>
+            </ol>
+            <p class="disclaimer">Nicht affiliated mit TradingView Inc. Keine Order-Execution. Nur Chart-Interaktion lokal.</p>
+          </div>
+        </section>
+
+        <!-- ANALYZE -->
+        <section class="view" id="view-analyze">
+          <div class="view-head row">
+            <div>
+              <h1>Analyze</h1>
+              <p class="muted">Vollständiger Snapshot des aktiven Charts</p>
+            </div>
+            <div class="toolbar">
+              <input type="text" id="analyze-symbol" class="input" placeholder="Symbol (optional)" />
+              <select id="analyze-tf" class="input">
+                <option value="">TF default</option>
+                <option value="1">1m</option>
+                <option value="5">5m</option>
+                <option value="15">15m</option>
+                <option value="60">1H</option>
+                <option value="240">4H</option>
+                <option value="D">D</option>
+                <option value="W">W</option>
+              </select>
+              <button class="btn btn-primary" id="btn-analyze">Run Analyze</button>
+            </div>
+          </div>
+          <div id="analyze-result" class="result-area empty-hint">Noch keine Analyse — „Run Analyze“ klicken.</div>
+        </section>
+
+        <!-- SCAN -->
+        <section class="view" id="view-scan">
+          <div class="view-head row">
+            <div>
+              <h1>Watchlist Scan</h1>
+              <p class="muted">Symbole nacheinander im Chart laden und Bias berechnen</p>
+            </div>
+            <div class="toolbar">
+              <button class="btn btn-primary" id="btn-scan">Run Scan</button>
+            </div>
+          </div>
+          <div class="card mb">
+            <label class="label">Symbole (kommagetrennt, leer = Config-Watchlist)</label>
+            <textarea id="scan-symbols" class="input textarea" rows="2" placeholder="BINANCE:BTCUSDT, CME_MINI:ES1!"></textarea>
+          </div>
+          <div id="scan-result" class="result-area empty-hint">Scan starten…</div>
+        </section>
+
+        <!-- BRIEF -->
+        <section class="view" id="view-brief">
+          <div class="view-head row">
+            <div>
+              <h1>Morning Brief</h1>
+              <p class="muted">Aktiver Chart + komplette Watchlist</p>
+            </div>
+            <div class="toolbar">
+              <button class="btn btn-primary" id="btn-brief">Generate Brief</button>
+              <button class="btn btn-ghost" id="btn-brief-copy" disabled>Copy MD</button>
+            </div>
+          </div>
+          <div id="brief-result" class="result-area empty-hint">Brief generieren…</div>
+        </section>
+
+        <!-- LEVELS -->
+        <section class="view" id="view-levels">
+          <div class="view-head row">
+            <div>
+              <h1>Levels</h1>
+              <p class="muted">S/R aus Pine Lines &amp; Labels</p>
+            </div>
+            <div class="toolbar">
+              <button class="btn btn-secondary" id="btn-levels">Read Levels</button>
+              <button class="btn btn-primary" id="btn-levels-draw">Read + Draw</button>
+            </div>
+          </div>
+          <div id="levels-result" class="result-area empty-hint">Levels lesen…</div>
+        </section>
+
+        <!-- SETUP -->
+        <section class="view" id="view-setup">
+          <div class="view-head row">
+            <div>
+              <h1>Workspace Setup</h1>
+              <p class="muted">Multi-Pane Layout in TradingView setzen</p>
+            </div>
+            <div class="toolbar">
+              <button class="btn btn-primary" id="btn-setup">Apply Setup</button>
+            </div>
+          </div>
+          <div class="card grid-form">
+            <div>
+              <label class="label">Layout</label>
+              <select id="setup-layout" class="input">
+                <option value="2x2">2×2 (4 charts)</option>
+                <option value="2x1">2×1 horizontal</option>
+                <option value="1x2">1×2 vertical</option>
+                <option value="3x1">3×1</option>
+                <option value="single">Single</option>
+              </select>
+            </div>
+            <div>
+              <label class="label">Timeframe</label>
+              <select id="setup-tf" class="input">
+                <option value="15">15</option>
+                <option value="5">5</option>
+                <option value="60">60</option>
+                <option value="D">D</option>
+              </select>
+            </div>
+            <div class="full">
+              <label class="label">Symbole (Reihenfolge = Pane 0…n)</label>
+              <textarea id="setup-symbols" class="input textarea" rows="3"></textarea>
+            </div>
+          </div>
+          <div id="setup-result" class="result-area mt empty-hint"></div>
+        </section>
+
+        <!-- SNAPSHOT -->
+        <section class="view" id="view-snapshot">
+          <div class="view-head row">
+            <div>
+              <h1>Snapshot</h1>
+              <p class="muted">Analyse + Chart-Screenshot speichern</p>
+            </div>
+            <div class="toolbar">
+              <button class="btn btn-primary" id="btn-snapshot">Take Snapshot</button>
+              <button class="btn btn-ghost" id="btn-open-reports">Open Reports</button>
+            </div>
+          </div>
+          <div id="snapshot-result" class="result-area empty-hint">Snapshot ausführen…</div>
+        </section>
+
+        <!-- SETTINGS -->
+        <section class="view" id="view-settings">
+          <div class="view-head">
+            <h1>Settings</h1>
+            <p class="muted">Gespeichert unter <code id="settings-path">~/.tv-trading-desk/config.json</code></p>
+          </div>
+          <div class="card grid-form">
+            <div class="full">
+              <label class="label">Watchlist (eine pro Zeile)</label>
+              <textarea id="cfg-watchlist" class="input textarea" rows="6"></textarea>
+            </div>
+            <div>
+              <label class="label">Default Timeframe</label>
+              <input id="cfg-tf" class="input" type="text" />
+            </div>
+            <div>
+              <label class="label">Scan Delay (ms)</label>
+              <input id="cfg-delay" class="input" type="number" min="500" step="100" />
+            </div>
+            <div>
+              <label class="label">Default Layout</label>
+              <input id="cfg-layout" class="input" type="text" />
+            </div>
+            <div>
+              <label class="label">Bull threshold %</label>
+              <input id="cfg-bull" class="input" type="number" step="0.05" />
+            </div>
+            <div>
+              <label class="label">Bear threshold %</label>
+              <input id="cfg-bear" class="input" type="number" step="0.05" />
+            </div>
+            <div>
+              <label class="label">Status poll (ms)</label>
+              <input id="cfg-poll" class="input" type="number" min="2000" step="500" />
+            </div>
+            <div class="check-row">
+              <label><input type="checkbox" id="cfg-auto" /> Auto-refresh Status</label>
+            </div>
+            <div class="full btn-row">
+              <button class="btn btn-primary" id="btn-save-cfg">Save</button>
+              <span class="muted small" id="cfg-saved"></span>
+            </div>
+          </div>
+        </section>
+
+        <!-- LOGS -->
+        <section class="view" id="view-logs">
+          <div class="view-head row">
+            <div>
+              <h1>Logs</h1>
+              <p class="muted">Ereignisse aus dem Main-Process</p>
+            </div>
+            <button class="btn btn-ghost" id="btn-clear-logs">Clear</button>
+          </div>
+          <pre id="log-view" class="log-view"></pre>
+        </section>
+      </main>
+    </div>
+
+    <div id="toast" class="toast hidden"></div>
+    <div id="busy" class="busy hidden"><div class="spinner"></div><span id="busy-text">Working…</span></div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>

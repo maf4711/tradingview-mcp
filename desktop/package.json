@@ -1,0 +1,81 @@
+{
+  "name": "tv-trading-desk",
+  "productName": "TV Trading Desk",
+  "version": "1.0.0",
+  "description": "macOS desktop app for TradingView chart analysis via CDP (tradingview-mcp)",
+  "type": "module",
+  "main": "electron/main.js",
+  "author": "local",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder --mac dir",
+    "dist:dmg": "electron-builder --mac dmg"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "electron": "^35.1.2",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "local.tv.trading.desk",
+    "productName": "TV Trading Desk",
+    "copyright": "Local build — not affiliated with TradingView Inc.",
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "files": [
+      "electron/**/*",
+      "renderer/**/*",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../src",
+        "to": "bridge/src",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "../trading-tool",
+        "to": "bridge/trading-tool",
+        "filter": [
+          "**/*",
+          "!tests/**",
+          "!reports/**"
+        ]
+      },
+      {
+        "from": "../node_modules",
+        "to": "bridge/node_modules",
+        "filter": [
+          "**/*"
+        ]
+      },
+      {
+        "from": "../package.json",
+        "to": "bridge/package.json"
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.finance",
+      "target": [
+        "dir",
+        "dmg"
+      ],
+      "identity": null,
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false
+    },
+    "dmg": {
+      "title": "TV Trading Desk"
+    }
+  },
+  "allowScripts": {
+    "electron@35.7.5": true
+  }
+}
