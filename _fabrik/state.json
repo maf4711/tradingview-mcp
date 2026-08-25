@@ -1,0 +1,16 @@
+{
+  "projekt": "tradingviewmcp",
+  "name": "tradingviewmcp",
+  "erstellt": "2026-08-22",
+  "phase": "IMPORTIERT",
+  "gates": "manuell",
+  "freigaben": {},
+  "wellen": { "gesamt": 0, "fertig": 0 },
+  "quelle": {
+    "typ": "repo2fabrik",
+    "codeAblage": "symlink-kanonisch",
+    "lokalerPfad": "/Users/a321/Developer/tradingviewmcp",
+    "remoteUrl": "git@github.com:maf4711/tradingview-mcp.git",
+    "importiertAm": "2026-08-22"
+  }
+}
